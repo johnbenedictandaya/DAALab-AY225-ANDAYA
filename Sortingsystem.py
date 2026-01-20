@@ -46,7 +46,6 @@ def insertion_sort_descending(arr):
         key = arr[i]
         j = i - 1
         
-        # Move elements that are smaller than key to one position ahead
         while j >= 0 and arr[j] < key:
             arr[j + 1] = arr[j]
             j -= 1
@@ -85,7 +84,6 @@ def merge_sort_descending(arr):
         result = []
         i = j = 0
         
-        # Merge in descending order
         while i < len(left) and j < len(right):
             if left[i] >= right[j]:
                 result.append(left[i])
@@ -109,6 +107,7 @@ def merge_sort_descending(arr):
 def read_dataset(filename):
     """
     Reads numbers from a file and returns them as a list.
+    Each number should be on a separate line or separated by spaces/commas.
     
     Args:
         filename: Path to the file containing numbers
@@ -146,103 +145,120 @@ def read_dataset(filename):
         return None
 
 
-def display_results(sorted_data, time_taken, algorithm_name):
+def display_menu():
     """
-    Displays the sorting results in a formatted manner.
-    
-    Args:
-        sorted_data: The sorted array
-        time_taken: Time taken to sort in seconds
-        algorithm_name: Name of the sorting algorithm used
+    Displays the main menu.
     """
-    print("\n" + "="*50)
-    print(f"SORTING COMPLETE - {algorithm_name}")
-    print("="*50)
-    print("\nSorted elements (descending order):\n")
+    print("\n==========================================")
+    print("      SORTING ALGORITHMS MENU")
+    print("==========================================")
+    print("1. Bubble Sort")
+    print("2. Insertion Sort")
+    print("3. Merge Sort")
+    print("4. Compare All Sorting Times")
+    print("5. Exit")
+    print("==========================================")
+
+
+def display_sorted_results(sorted_data, time_taken, algorithm_name):
+    """
+    Displays the sorted data and statistics.
+    """
+    print("\nSORTING COMPLETE!\n")
+    print("Sorted elements (descending order):\n")
     
     for num in sorted_data:
         print(f"{num}")
     
-    print(f"\n{'='*50}")
+    print(f"\n==========================================")
+    print(f"Algorithm: {algorithm_name}")
     print(f"Time taken: {time_taken:.6f} seconds")
     print(f"Total elements sorted: {len(sorted_data)}")
     
     is_sorted = all(sorted_data[i] >= sorted_data[i+1] for i in range(len(sorted_data)-1))
     print(f"Verification: {'✓ CORRECT!' if is_sorted else '✗ FAILED!'}")
-    print("="*50 + "\n")
+    print("==========================================")
 
 
-def display_menu():
+def compare_all_sorts(data):
     """
-    Displays the main menu.
+    Compares the performance of all three sorting algorithms.
     """
-    print("\n" + "="*50)
-    print("     SORTING ALGORITHMS - DESCENDING ORDER")
-    print("="*50)
-    print("1. Bubble Sort")
-    print("2. Insertion Sort")
-    print("3. Merge Sort")
-    print("4. Exit")
-    print("="*50)
-
-
-def main():
-    """
-    Main program loop.
-    """
-    filename = "dataset.txt"
+    print("\n==========================================")
+    print("   COMPARING ALL SORTING ALGORITHMS")
+    print("==========================================\n")
     
-    print("\n" + "*"*50)
-    print("     WELCOME TO SORTING ALGORITHMS PROGRAM")
-    print("*"*50)
-    print(f"\nReading data from '{filename}'...")
+    print("Running Bubble Sort...")
+    _, bubble_time = bubble_sort_descending(data.copy())
+    print(f"✓ Bubble Sort completed in {bubble_time:.6f} seconds")
+    
+    print("\nRunning Insertion Sort...")
+    _, insertion_time = insertion_sort_descending(data.copy())
+    print(f"✓ Insertion Sort completed in {insertion_time:.6f} seconds")
+    
+    print("\nRunning Merge Sort...")
+    _, merge_time = merge_sort_descending(data.copy())
+    print(f"✓ Merge Sort completed in {merge_time:.6f} seconds")
+    
+    print("\n==========================================")
+    print("           COMPARISON RESULTS")
+    print("==========================================")
+    print(f"Bubble Sort:    {bubble_time:.6f} seconds")
+    print(f"Insertion Sort: {insertion_time:.6f} seconds")
+    print(f"Merge Sort:     {merge_time:.6f} seconds")
+    print("==========================================")
+    
+    # Determine the fastest
+    times = {
+        'Bubble Sort': bubble_time,
+        'Insertion Sort': insertion_time,
+        'Merge Sort': merge_time
+    }
+    fastest = min(times, key=times.get)
+    print(f"\n🏆 FASTEST: {fastest} ({times[fastest]:.6f} seconds)")
+    print("==========================================")
+
+
+# Main program
+if __name__ == "__main__":
+    filename = "dataset.txt"
+    print(f"Reading data from '{filename}'...")
     
     data = read_dataset(filename)
     
     if data is None:
         print("Failed to read data. Exiting program.")
-        return
+        exit()
     
-    print(f"✓ Dataset loaded successfully: {len(data)} elements")
+    print(f"Dataset loaded: {len(data)} elements")
     
     while True:
         display_menu()
+        choice = input("\nEnter your choice (1-5): ").strip()
         
-        try:
-            choice = input("Enter your choice (1-4): ").strip()
+        if choice == '1':
+            print("\n>>> Running BUBBLE SORT...")
+            sorted_data, time_taken = bubble_sort_descending(data.copy())
+            display_sorted_results(sorted_data, time_taken, "BUBBLE SORT")
             
-            if choice == '1':
-                print("\n→ Running BUBBLE SORT...")
-                sorted_data, time_taken = bubble_sort_descending(data.copy())
-                display_results(sorted_data, time_taken, "BUBBLE SORT")
-                
-            elif choice == '2':
-                print("\n→ Running INSERTION SORT...")
-                sorted_data, time_taken = insertion_sort_descending(data.copy())
-                display_results(sorted_data, time_taken, "INSERTION SORT")
-                
-            elif choice == '3':
-                print("\n→ Running MERGE SORT...")
-                sorted_data, time_taken = merge_sort_descending(data.copy())
-                display_results(sorted_data, time_taken, "MERGE SORT")
-                
-            elif choice == '4':
-                print("\n" + "*"*50)
-                print("     Thank you for using the program!")
-                print("     Exiting...")
-                print("*"*50 + "\n")
-                break
-                
-            else:
-                print("\n⚠ Invalid choice! Please enter a number between 1 and 4.")
-                
-        except KeyboardInterrupt:
-            print("\n\nProgram interrupted by user. Exiting...")
+        elif choice == '2':
+            print("\n>>> Running INSERTION SORT...")
+            sorted_data, time_taken = insertion_sort_descending(data.copy())
+            display_sorted_results(sorted_data, time_taken, "INSERTION SORT")
+            
+        elif choice == '3':
+            print("\n>>> Running MERGE SORT...")
+            sorted_data, time_taken = merge_sort_descending(data.copy())
+            display_sorted_results(sorted_data, time_taken, "MERGE SORT")
+            
+        elif choice == '4':
+            compare_all_sorts(data)
+            
+        elif choice == '5':
+            print("\n==========================================")
+            print("   Thank you for using the program!")
+            print("==========================================\n")
             break
-        except Exception as e:
-            print(f"\n⚠ An error occurred: {e}")
-            print("Please try again.")
-
-
-if __name__ == "__main__":
-    main()
+            
+        else:
+            print("\n⚠ Invalid choice! Please enter a number between 1 and 5.")
