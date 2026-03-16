@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TSP – Node Map & Shortest Path</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>Travelling Salesman Problem</h1>
+    <p class="subtitle">Node Map Visualizer &amp; Shortest Path Finder</p>
+  </header>
+
+  <main>
+
+    <!-- ── SECTION 1: Node Map ───────────────────────────────────── -->
+    <section class="card" id="section-map">
+      <h2><span class="pill">Part 1</span> Node Map</h2>
+      <p class="hint">All edges are shown with their Distance / Time / Fuel labels. Hover an edge label for details.</p>
+      <div class="canvas-wrap">
+        <canvas id="graphCanvas"></canvas>
+        <div id="tooltip" class="tooltip hidden"></div>
+      </div>
+      <div class="legend">
+        <span class="dot" style="background:var(--node-color)"></span> Node &nbsp;
+        <span class="dot" style="background:var(--edge-color)"></span> Edge &nbsp;
+        <span class="dot" style="background:var(--accent)"></span> Selected Path
+      </div>
+    </section>
+
+    <!-- ── SECTION 2: Shortest Path ─────────────────────────────── -->
+    <section class="card" id="section-path">
+      <h2><span class="pill">Part 2</span> Shortest Path Finder</h2>
+
+      <div class="controls">
+        <div class="field">
+          <label for="startNode">Start Node</label>
+          <select id="startNode"></select>
+        </div>
+        <div class="field">
+          <label for="endNode">End Node</label>
+          <select id="endNode"></select>
+        </div>
+        <div class="field">
+          <label for="criteria">Optimize by</label>
+          <select id="criteria">
+            <option value="distance">Distance (km)</option>
+            <option value="time">Time (mins)</option>
+            <option value="fuel">Fuel (Liters)</option>
+          </select>
+        </div>
+        <button id="findBtn">Find Shortest Path</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+
+      <!-- Result -->
+      <div id="result" class="result hidden">
+        <h3 id="result-title"></h3>
+        <div class="path-row" id="path-display"></div>
+        <div class="stats" id="stats-display"></div>
+        <div class="steps-table-wrap">
+          <table id="steps-table">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Distance (km)</th>
+                <th>Time (mins)</th>
+                <th>Fuel (L)</th>
+              </tr>
+            </thead>
+            <tbody id="steps-body"></tbody>
+            <tfoot id="steps-foot"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div id="no-path" class="no-path hidden">
+        <span>⚠ No path found between the selected nodes.</span>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: Edge Table ─────────────────────────────────── -->
+    <section class="card" id="section-table">
+      <h2><span class="pill">Data</span> Edge List</h2>
+      <div class="table-wrap">
+        <table id="edgeTable">
+          <thead>
+            <tr>
+              <th>From</th><th>To</th>
+              <th>Distance (km)</th><th>Time (mins)</th><th>Fuel (L)</th>
+            </tr>
+          </thead>
+          <tbody id="edgeBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Travelling Salesman Problem &mdash; Midterm Lab 2</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
