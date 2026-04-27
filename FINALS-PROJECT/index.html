@@ -57,6 +57,74 @@
 
 
 <!-- Add the SECTION 2 & 3 · CHARTS (your module dito) -->
+
+
+ <!-- ───────────────────────────────────
+           SECTION 2 · CHARTS
+      ─────────────────────────────────── -->
+      <section class="dash-section" id="sec-charts">
+        <div class="section-header">
+          <span class="section-tag">MODULE 02</span>
+          <h2 class="section-title">Visualisations</h2>
+          <p class="section-desc">Bar chart of label frequencies and pixel intensity scatter plot.</p>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-panel">
+            <div class="chart-panel-header">
+              <span class="chart-panel-title">Label Frequency Distribution</span>
+              <span class="chart-type-tag">BAR CHART</span>
+            </div>
+            <div class="chart-body">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-panel">
+            <div class="chart-panel-header">
+              <span class="chart-panel-title">Pixel Mean vs Sample Index</span>
+              <span class="chart-type-tag">SCATTER PLOT</span>
+            </div>
+            <div class="chart-body">
+              <canvas id="scatterChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────────────
+           SECTION 3 · STATISTICS
+      ─────────────────────────────────── -->
+      <section class="dash-section" id="sec-statistics">
+        <div class="section-header">
+          <span class="section-tag">MODULE 02</span>
+          <h2 class="section-title">Statistical Analysis</h2>
+          <p class="section-desc">Per-class mean, standard deviation, and Pearson correlation vs. class 0.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="analysis-table" id="analysisTable">
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Category</th>
+                <th>Count</th>
+                <th>Mean (μ)</th>
+                <th>Std Dev (σ)</th>
+                <th>Variance (σ²)</th>
+                <th>Pearson r (vs L0)</th>
+              </tr>
+            </thead>
+            <tbody id="analysisTableBody">
+              <tr><td colspan="7" class="placeholder-row">Load the dataset to compute statistics…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────────────
+           SECTION 4 · DATASET EXPLORER
+      ─────────────────────────────────── -->
  
       <section class="dash-section" id="sec-dataset">
         <div class="section-header">
