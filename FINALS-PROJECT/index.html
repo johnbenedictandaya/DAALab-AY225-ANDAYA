@@ -18,8 +18,80 @@
 </head>
 <body>
 
-<!-- im going to add the side bar here you add the other stuff -->
- 
+  <!-- ═══════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="1" y="1" width="11" height="11" rx="2" fill="var(--neon)"/>
+          <rect x="16" y="1" width="11" height="11" rx="2" fill="var(--neon)" opacity=".5"/>
+          <rect x="1" y="16" width="11" height="11" rx="2" fill="var(--neon)" opacity=".5"/>
+          <rect x="16" y="16" width="11" height="11" rx="2" fill="var(--neon)" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">FMNIST</span>
+        <span class="brand-sub">Dashboard</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#sec-overview"   class="nav-link active" data-section="sec-overview">
+        <svg class="nav-icon" viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+        Overview
+      </a>
+      <a href="#sec-charts"     class="nav-link" data-section="sec-charts">
+        <svg class="nav-icon" viewBox="0 0 20 20"><rect x="2" y="10" width="4" height="8" rx="1"/><rect x="8" y="6" width="4" height="12" rx="1"/><rect x="14" y="2" width="4" height="16" rx="1"/></svg>
+        Charts
+      </a>
+      <a href="#sec-statistics" class="nav-link" data-section="sec-statistics">
+        <svg class="nav-icon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke-width="1.5" fill="none"/><path d="M10 6v4l3 2" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+        Statistics
+      </a>
+      <a href="#sec-dataset"    class="nav-link" data-section="sec-dataset">
+        <svg class="nav-icon" viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="2" rx="1"/><rect x="2" y="9" width="16" height="2" rx="1"/><rect x="2" y="14" width="16" height="2" rx="1"/></svg>
+        Dataset
+      </a>
+      <a href="#sec-insights"   class="nav-link" data-section="sec-insights">
+        <svg class="nav-icon" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 1 6 6c0 2.5-1.5 4.6-3.5 5.6V16h-5v-2.4C5.5 12.6 4 10.5 4 8a6 6 0 0 1 6-6z" fill="none" stroke-width="1.5"/><rect x="7.5" y="17" width="5" height="1.5" rx=".75"/></svg>
+        Insights
+      </a>
+    </nav>
+
+    <!-- ── DATASET SELECTOR in sidebar ── -->
+    <div class="sidebar-dataset-selector">
+      <label class="sidebar-ds-label">Select Dataset</label>
+      <div class="ds-toggle-group" id="dsToggleGroup">
+        <button class="ds-toggle-btn" id="dsTrainBtn" onclick="selectDataset('train')">
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="2" width="16" height="3" rx="1" fill="currentColor"/>
+            <rect x="2" y="7" width="16" height="3" rx="1" fill="currentColor" opacity=".6"/>
+            <rect x="2" y="12" width="16" height="3" rx="1" fill="currentColor" opacity=".3"/>
+            <rect x="2" y="17" width="10" height="1.5" rx=".75" fill="currentColor" opacity=".2"/>
+          </svg>
+          <span class="ds-btn-label">Training Set</span>
+          <span class="ds-btn-count">60k</span>
+        </button>
+        <button class="ds-toggle-btn active" id="dsTestBtn" onclick="selectDataset('test')">
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="2" width="16" height="3" rx="1" fill="currentColor"/>
+            <rect x="2" y="7" width="16" height="3" rx="1" fill="currentColor" opacity=".6"/>
+            <rect x="2" y="12" width="8" height="3" rx="1" fill="currentColor" opacity=".3"/>
+          </svg>
+          <span class="ds-btn-label">Test Set</span>
+          <span class="ds-btn-count">10k</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-status">
+      <div class="status-indicator" id="statusDot"></div>
+      <span id="statusLabel">Idle — no data</span>
+    </div>
+  </aside>
+
   <!-- ═══════════════════════════════════════
        MAIN CONTENT
   ═══════════════════════════════════════ -->
@@ -51,13 +123,83 @@
 
     <main class="content">
 
-<!--
-           Im going to add overview here, you can add your charts/stats in the next sections
--->
+     <!---
+           SECTION 1 · OVERVIEW
+    -->
+      <section class="dash-section" id="sec-overview">
+        <div class="section-header">
+          <span class="section-tag">MODULE 01</span>
+          <h2 class="section-title">Overview</h2>
+          <p class="section-desc">Summary statistics computed from the loaded dataset.</p>
+        </div>
+
+        <div class="cards-row">
+          <!-- Card: Total Samples -->
+          <div class="stat-card" id="card-0">
+            <div class="card-glow"></div>
+            <div class="card-top">
+              <svg class="card-icon" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span class="card-badge">SAMPLES</span>
+            </div>
+            <div class="card-value" id="stat-total">—</div>
+            <div class="card-label">Total Samples</div>
+            <div class="card-bar"><div class="card-bar-fill" style="width:0%" id="bar-total"></div></div>
+          </div>
+
+          <!-- Card: Unique Classes -->
+          <div class="stat-card" id="card-1">
+            <div class="card-glow"></div>
+            <div class="card-top">
+              <svg class="card-icon" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span class="card-badge">CLASSES</span>
+            </div>
+            <div class="card-value" id="stat-classes">10</div>
+            <div class="card-label">Unique Categories</div>
+            <div class="card-bar"><div class="card-bar-fill" style="width:100%" id="bar-classes"></div></div>
+          </div>
+
+          <!-- Card: Pixel Features -->
+          <div class="stat-card" id="card-2">
+            <div class="card-glow"></div>
+            <div class="card-top">
+              <svg class="card-icon" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M7 7h2v2H7zM11 7h2v2h-2zM15 7h2v2h-2zM7 11h2v2H7zM11 11h2v2h-2zM15 11h2v2h-2z" fill="currentColor" opacity=".6"/>
+              </svg>
+              <span class="card-badge">FEATURES</span>
+            </div>
+            <div class="card-value" id="stat-features">784</div>
+            <div class="card-label">Pixel Features (28×28)</div>
+            <div class="card-bar"><div class="card-bar-fill" style="width:100%" id="bar-features"></div></div>
+          </div>
+
+          <!-- Card: Avg Pixel Intensity -->
+          <div class="stat-card" id="card-3">
+            <div class="card-glow"></div>
+            <div class="card-top">
+              <svg class="card-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M3 12h18M3 6l9 6-9 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="card-badge">INTENSITY</span>
+            </div>
+            <div class="card-value" id="stat-avgpixel">—</div>
+            <div class="card-label">Avg Pixel Intensity</div>
+            <div class="card-bar"><div class="card-bar-fill" style="width:0%" id="bar-avgpixel"></div></div>
+          </div>
+        </div>
+      </section>
 
 
 <!-- Add the SECTION 2 & 3 · CHARTS (your module dito) -->
-
+    
 
  <!-- ───────────────────────────────────
            SECTION 2 · CHARTS
