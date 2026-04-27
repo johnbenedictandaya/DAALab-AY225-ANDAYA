@@ -43,7 +43,7 @@ Plaintext
 Clone the Repository:
 
 Bash
-git clone https://github.com/your-username/fashion-mnist-dashboard.git
+git clone https://github.com/ronzandev/DAALab-AY225-MORANTE.git
 cd fashion-mnist-dashboard
 Prepare the Data:
 
@@ -87,8 +87,8 @@ Browser Memory: Parsing the full 60k-row training set can consume significant br
 CORS Requirements: The project will not function if opened directly as a file (file://...). It requires a http:// or localhost environment.
 
 👥 Contributors
-Student 1: [Your Name] — Dataset Engine, Stats Logic, & Table Rendering.
+Student 1: MORANTE, RON ZANDRO — Dataset Engine, Stats Logic, & Table Rendering.
 
-Student 2: [Collaborator Name] — Data Visualization, Narrative Engine, & UI Polishing.
+Student 2: FUASO, JOHN WILLFORD — Data Visualization, Narrative Engine, & UI Polishing.
 
 Developed for the Data Science Collaborative Git Project.
