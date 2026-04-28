@@ -413,3 +413,150 @@ function calculateStatsSinglePass(data) {
     return { label, name, count: c, mean, stdDev, variance, pearson };
   });
 }
+
+/* ─────────────────────────────────────────────────────────────
+   initCharts(data)
+   ──────────────────────────────────────────────────────────
+   Bar chart  — pulls counts directly from cachedStats (no rescan).
+   Scatter    — reservoir-sampled to SCATTER_MAX points.
+               Dataset size never affects Chart.js frame time.
+───────────────────────────────────────────────────────────── */
+function initCharts(data) {
+  if (!data || data.length === 0) return;
+
+  // ── Bar chart (counts from cache — zero allRows scan) ──────
+  const labelCounts = cachedStats.map(s => s.count);
+
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  if (chartBar) chartBar.destroy();
+
+  chartBar = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: CLASS_NAMES,
+      datasets: [{
+        label: 'Samples',
+        data: labelCounts,
+        backgroundColor: CLASS_COLORS.map(c => c + 'bb'),
+        borderColor: CLASS_COLORS,
+        borderWidth: 1.5,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 500 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0d1217', titleColor: '#00ffa3',
+          bodyColor: '#6b8fa8', borderColor: '#1e2d3d', borderWidth: 1,
+          callbacks: { label: ctx => `  ${ctx.parsed.y.toLocaleString()} samples` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b8fa8', font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 40, minRotation: 40 },
+          grid:  { color: '#1e2d3d' }
+        },
+        y: {
+          ticks: { color: '#6b8fa8', font: { family: 'JetBrains Mono', size: 9 } },
+          grid:  { color: '#1e2d3d' }
+        }
+      }
+    }
+  });
+
+  // ── Scatter chart — reservoir-sampled ──────────────────────
+  //
+  // Downsampling strategy: reservoir sampling gives a statistically
+  // uniform random sample across the entire dataset rather than
+  // just the first N rows.  SCATTER_MAX = 500 points total.
+  const sample     = reservoirSample(data, SCATTER_MAX);
+  const sampleSize = sample.length;
+
+  // Per-class point arrays (loop once over the sample)
+  const classBuckets = Array.from({ length: 10 }, () => []);
+  for (let i = 0; i < sampleSize; i++) {
+    const row = sample[i];
+    let s = 0;
+    for (let p = 0; p < 784; p++) s += row.pixels[p];
+    classBuckets[row.label].push({ x: i, y: s / 784 });
+  }
+
+  const scatterDatasets = CLASS_NAMES.map((name, label) => ({
+    label,
+    data:            classBuckets[label],
+    backgroundColor: CLASS_COLORS[label] + '99',
+    borderColor:     CLASS_COLORS[label],
+    borderWidth:     0,
+    pointRadius:     3,
+    pointHoverRadius:5,
+    label:           name,
+  }));
+
+  const scatterCtx = document.getElementById('scatterChart').getContext('2d');
+  if (chartScatter) chartScatter.destroy();
+
+  chartScatter = new Chart(scatterCtx, {
+    type: 'scatter',
+    data: { datasets: scatterDatasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 500 },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#6b8fa8', font: { family: 'JetBrains Mono', size: 9 }, boxWidth: 9, padding: 8 }
+        },
+        tooltip: {
+          backgroundColor: '#0d1217', titleColor: '#00ffa3',
+          bodyColor: '#6b8fa8', borderColor: '#1e2d3d', borderWidth: 1,
+          callbacks: { label: ctx => `  ${ctx.dataset.label}: μ = ${ctx.parsed.y.toFixed(1)}` }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: `Sample Index (${sampleSize.toLocaleString()} sampled of ${rowCount.toLocaleString()})`,
+            color: '#3a5468', font: { family: 'JetBrains Mono', size: 9 }
+          },
+          ticks: { color: '#3a5468', font: { size: 9 } }, grid: { color: '#1e2d3d' }
+        },
+        y: {
+          title: { display: true, text: 'Mean Pixel', color: '#3a5468', font: { family: 'JetBrains Mono', size: 9 } },
+          ticks: { color: '#3a5468', font: { size: 9 } }, grid: { color: '#1e2d3d' }
+        }
+      }
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   renderAnalysisTable()
+   Reads from cachedStats — zero re-scan of allRows.
+───────────────────────────────────────────────────────────── */
+function renderAnalysisTable() {
+  if (!cachedStats) return;
+  const tbody = document.getElementById('analysisTableBody');
+  const frag  = document.createDocumentFragment();
+  tbody.innerHTML = '';
+
+  cachedStats.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.label}</td>
+      <td>${s.name}</td>
+      <td>${s.count.toLocaleString()}</td>
+      <td>${s.mean.toFixed(3)}</td>
+      <td>${s.stdDev.toFixed(3)}</td>
+      <td>${s.variance.toFixed(3)}</td>
+      <td>${isNaN(s.pearson) ? '—' : s.pearson.toFixed(4)}</td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+}
