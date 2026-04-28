@@ -1,3 +1,25 @@
+/**
+ * ════════════════════════════════════════════════════════════════
+ * Fashion-MNIST Dashboard · script.js  (Performance Rewrite)
+ * ────────────────────────────────────────────────────────────────
+ * Optimisations applied vs. previous version
+ * ──────────────────────────────────────────
+ *  1. worker:true  — CSV parsing is entirely off the main thread.
+ *  2. Single-pass stats engine — one for-loop computes Sum, SumSq,
+ *     Count, and the per-row means needed for Pearson r.
+ *     No .filter()/.map()/.reduce() on the large array.
+ *  3. Scatter downsampling — reservoir-sampled to SCATTER_MAX (500)
+ *     points so Chart.js never pushes > 500 GPU quads.
+ *  4. requestAnimationFrame pipeline — two-frame hand-off lets the
+ *     browser paint the "done" overlay before heavy DOM/WebGL work.
+ *  5. Canvas efficiency — draws at native 28×28 (784-pixel loop)
+ *     then uses CSS width/height for visual 2× upscale, cutting the
+ *     inner loop from 3 136 to 784 iterations per image.
+ *  6. Stat cache — calculateStatsSinglePass runs once; renderCards,
+ *     renderAnalysisTable, renderInsights all read from the cache.
+ * ════════════════════════════════════════════════════════════════
+ */
+
 'use strict';
 
 /* ── CONSTANTS ──────────────────────────────────────────────── */
@@ -326,6 +348,99 @@ function renderSummaryCards() {
   elAvg.textContent = avgIntensity.toFixed(2);
   elAvg.classList.add('loaded');
   document.getElementById('bar-avgpixel').style.width = `${(avgIntensity / 255) * 100}%`;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   renderTable(data)
+   DocumentFragment batch insertion.
+   Per-row stats (mean/max/nonZero) computed in a single 784-
+   iteration loop — no Array.from, no helper calls, no spread.
+───────────────────────────────────────────────────────────── */
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="placeholder-row">No records match the current filter.</td></tr>';
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  for (let idx = 0; idx < data.length; idx++) {
+    const row    = data[idx];
+    const pixels = row.pixels;
+
+    // Single tight loop over 784 values — no spread, no helper
+    let sum = 0, max = 0, nonZero = 0;
+    for (let p = 0; p < 784; p++) {
+      const v = pixels[p];
+      sum    += v;
+      if (v > max) max = v;
+      if (v > 0)   nonZero++;
+    }
+    const rowMean = sum / 784;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td></td>
+      <td>${row.label}</td>
+      <td>${CLASS_NAMES[row.label] ?? '?'}</td>
+      <td><span class="mono">${rowMean.toFixed(1)}</span></td>
+      <td><span class="mono">${max}</span></td>
+      <td><span class="mono">${nonZero}</span></td>`;
+
+    // Append canvas into the pre-created empty <td> (column 2)
+    tr.children[1].appendChild(makeImageCanvas(pixels));
+    frag.appendChild(tr);
+  }
+
+  tbody.innerHTML = '';
+  tbody.appendChild(frag);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   applyFilterSort()
+   Pixel-mean sort pre-computes means in one pass before sorting
+   so the comparator never recomputes inside the sort loop.
+───────────────────────────────────────────────────────────── */
+function applyFilterSort() {
+  if (!rowCount) return;
+
+  const labelFilter = document.getElementById('filterLabel').value;
+  const sortBy      = document.getElementById('sortBy').value;
+  const rowsToShow  = parseInt(document.getElementById('rowsToShow').value, 10);
+
+  let working = labelFilter === ''
+    ? allRows.slice()
+    : allRows.filter(r => r.label === parseInt(labelFilter, 10));
+
+  const totalMatched = working.length;
+
+  switch (sortBy) {
+    case 'label_asc':  working.sort((a, b) => a.label - b.label); break;
+    case 'label_desc': working.sort((a, b) => b.label - a.label); break;
+    case 'mean_asc':
+    case 'mean_desc': {
+      // Pre-compute means once so the comparator does zero pixel work
+      const withMeans = working.map(r => {
+        let s = 0;
+        for (let i = 0; i < 784; i++) s += r.pixels[i];
+        return { r, m: s / 784 };
+      });
+      const dir = sortBy === 'mean_asc' ? 1 : -1;
+      withMeans.sort((a, b) => dir * (a.m - b.m));
+      working = withMeans.map(x => x.r);
+      break;
+    }
+    default: break; // 'original' — preserve allRows order
+  }
+
+  const displayed = working.slice(0, rowsToShow);
+  document.getElementById('tableInfo').textContent =
+    `Showing ${displayed.length.toLocaleString()} of ${totalMatched.toLocaleString()} matching rows`;
+
+  renderTable(displayed);
 }
 
 /* ════════════════════════════════════════════════════════════════

@@ -1,3 +1,9 @@
+/* ════════════════════════════════════════════════════════════════
+   Fashion-MNIST Dashboard · style.css
+   Theme: Deep-space terminal — green phosphor on near-black
+   Fonts: Orbitron · Syne · JetBrains Mono
+   ════════════════════════════════════════════════════════════════ */
+
 /* ── CSS VARIABLES ──────────────────────────────────────────── */
 :root {
   /* Core palette */
@@ -459,12 +465,6 @@ body::before {
   line-height: 1.6;
 }
 
-.section-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
 /* ── SUMMARY CARDS ──────────────────────────────────────────── */
 .cards-row {
   display: grid;
@@ -710,7 +710,6 @@ body::before {
   margin-left: auto;
   padding-bottom: 9px;
 }
-
 
 /* ── DATA TABLE ─────────────────────────────────────────────── */
 .data-table {
