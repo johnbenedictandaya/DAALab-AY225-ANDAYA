@@ -560,3 +560,112 @@ function renderAnalysisTable() {
   });
   tbody.appendChild(frag);
 }
+
+/* ─────────────────────────────────────────────────────────────
+   renderInsights()
+   All findings derived from cachedStats — no allRows scan.
+───────────────────────────────────────────────────────────── */
+function renderInsights() {
+  if (!cachedStats || !rowCount) return;
+
+  const stats     = cachedStats;
+  const container = document.getElementById('insightsContainer');
+  container.innerHTML = '';
+
+  const total      = rowCount;
+  const globalMean = arrayMean(stats.map(s => s.mean));
+
+  const byMean    = [...stats].sort((a, b) => b.mean     - a.mean);
+  const byVar     = [...stats].sort((a, b) => b.variance - a.variance);
+  const byCount   = [...stats].sort((a, b) => b.count    - a.count);
+  const byPearson = stats
+    .filter(s => s.label !== 0 && !isNaN(s.pearson))
+    .sort((a, b) => b.pearson - a.pearson);
+
+  const brightest   = byMean[0];
+  const darkest     = byMean[byMean.length - 1];
+  const mostVar     = byVar[0];
+  const leastVar    = byVar[byVar.length - 1];
+  const largestCls  = byCount[0];
+  const smallestCls = byCount[byCount.length - 1];
+  const topCorr     = byPearson[0];
+  const lowCorr     = byPearson[byPearson.length - 1];
+
+  const ideal      = total / 10;
+  const maxDev     = Math.max(...stats.map(s => Math.abs(s.count - ideal)));
+  const isBalanced = maxDev < ideal * 0.05;
+  const dsLabel    = DATASETS[ACTIVE_DATASET].label;
+
+  const insights = [
+    {
+      title: '◈  Dataset Overview',
+      body: `This Fashion-MNIST <strong>${dsLabel}</strong> contains
+             <strong>${total.toLocaleString()} samples</strong> across
+             <strong>10 clothing categories</strong>, each a
+             <em>28×28 px</em> greyscale image (<em>784 features</em>).
+             Global mean pixel intensity: <em>μ = ${globalMean.toFixed(2)}</em> —
+             the dark background dominates, as expected for MNIST-style data.`
+    },
+    {
+      title: '▲  Brightness Leaders',
+      body: `<strong>${brightest.name}</strong> (label ${brightest.label}) is the brightest
+             class at <em>μ = ${brightest.mean.toFixed(2)}</em>, while
+             <strong>${darkest.name}</strong> (label ${darkest.label}) is darkest
+             at <em>μ = ${darkest.mean.toFixed(2)}</em>.
+             The ~<em>${(brightest.mean - darkest.mean).toFixed(1)}</em>-unit gap
+             is exploitable by intensity-based pre-classifiers.`
+    },
+    {
+      title: '◎  Intra-class Variability',
+      body: `<strong>${mostVar.name}</strong> (label ${mostVar.label}) has the highest
+             variance (<em>σ² = ${mostVar.variance.toFixed(2)}</em>,
+             σ = ${mostVar.stdDev.toFixed(2)}), indicating silhouette diversity.
+             <strong>${leastVar.name}</strong> (label ${leastVar.label}) is most uniform
+             (<em>σ² = ${leastVar.variance.toFixed(2)}</em>).
+             High-variance classes typically need additional augmentation.`
+    },
+    {
+      title: '▦  Class Balance',
+      body: isBalanced
+        ? `Dataset is <strong>well-balanced</strong>: all classes stay within 5% of the
+           ideal <em>${ideal.toFixed(0)}</em> samples each.
+           Accuracy is a reliable metric — no class-weighting needed.`
+        : `Dataset is <strong>slightly imbalanced</strong>.
+           <strong>${largestCls.name}</strong> leads
+           (<em>${largestCls.count.toLocaleString()}</em> samples) vs.
+           <strong>${smallestCls.name}</strong>
+           (<em>${smallestCls.count.toLocaleString()}</em>).
+           Consider class-weighted loss or stratified sampling.`
+    },
+    {
+      title: '◆  Pearson Correlation vs T-shirt/Top',
+      body: topCorr
+        ? `<strong>${topCorr.name}</strong> (label ${topCorr.label}) is most similar to
+           T-shirt/Top (<em>r = ${topCorr.pearson.toFixed(3)}</em>) — likely causing
+           classifier confusion. <strong>${lowCorr.name}</strong>
+           (label ${lowCorr.label}) is most dissimilar
+           (<em>r = ${lowCorr.pearson.toFixed(3)}</em>) and easiest to separate.`
+        : 'Pearson data unavailable — ensure label-0 rows are present.'
+    },
+    {
+      title: '◉  Modelling Recommendation',
+      body: `The <em>784-dimensional</em> input space strongly favours a
+             <strong>Convolutional Neural Network (CNN)</strong>.
+             Normalise pixels to <em>[0, 1]</em> (÷ 255).
+             For <strong>${mostVar.name}</strong> — highest-variance class —
+             horizontal flips and random crops reduce overfitting.
+             A 3-conv-layer baseline typically achieves &gt;90% accuracy in 10 epochs.`
+    }
+  ];
+
+  const frag = document.createDocumentFragment();
+  insights.forEach(ins => {
+    const card = document.createElement('div');
+    card.className = 'insight-card';
+    card.innerHTML = `
+      <div class="insight-heading">${ins.title}</div>
+      <div class="insight-body">${ins.body}</div>`;
+    frag.appendChild(card);
+  });
+  container.appendChild(frag);
+}
