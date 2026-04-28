@@ -327,3 +327,89 @@ function renderSummaryCards() {
   elAvg.classList.add('loaded');
   document.getElementById('bar-avgpixel').style.width = `${(avgIntensity / 255) * 100}%`;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   MODULE 2 — STUDENT 2
+   ════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────
+   calculateStatsSinglePass(data)
+   ──────────────────────────────────────────────────────────
+   ONE for-loop over data.  Per-class accumulators:
+     count[l]   — row count
+     sum[l]     — Σ(per-row pixel mean)
+     sumSq[l]   — Σ(per-row pixel mean²)   → variance via E[X²]−(EX)²
+     means[l]   — Array of per-row means    → Pearson r vs label-0
+
+   A second micro-loop over 10 classes (not allData) finalises
+   stdDev, variance, and Pearson r.
+
+   No .filter(), .map(), or .reduce() on the large array.
+───────────────────────────────────────────────────────────── */
+function calculateStatsSinglePass(data) {
+  const N = data.length;
+  if (!N) return CLASS_NAMES.map((name, label) =>
+    ({ label, name, count: 0, mean: 0, stdDev: 0, variance: 0, pearson: NaN }));
+
+  // Float64Array avoids JS-object boxing for hot numeric accumulation
+  const count = new Float64Array(10);
+  const sum   = new Float64Array(10);
+  const sumSq = new Float64Array(10);
+
+  // Per-class arrays of per-row means (one number per row, not 784 pixels)
+  const means = [[], [], [], [], [], [], [], [], [], []];
+
+  // ── THE single pass ───────────────────────────────────────
+  for (let i = 0; i < N; i++) {
+    const row = data[i];
+    const lbl = row.label;
+    const px  = row.pixels;
+
+    // Inline pixel mean — no Array.from, no helper function call
+    let s = 0;
+    for (let p = 0; p < 784; p++) s += px[p];
+    const m = s / 784;
+
+    count[lbl]++;
+    sum[lbl]   += m;
+    sumSq[lbl] += m * m;
+    means[lbl].push(m);
+  }
+
+  // ── Micro-loop over 10 classes — not over allData ─────────
+  const ref     = means[0];                             // label-0 mean vector
+  const refMean = count[0] > 0 ? sum[0] / count[0] : 0;
+
+  return CLASS_NAMES.map((name, label) => {
+    const c = count[label];
+    if (c === 0) return { label, name, count: 0, mean: 0, stdDev: 0, variance: 0, pearson: NaN };
+
+    const mean = sum[label] / c;
+    // Variance via computational formula: E[X²] − (E[X])²
+    // More numerically stable than two-pass when means are large
+    const variance = Math.max(0, sumSq[label] / c - mean * mean);
+    const stdDev   = Math.sqrt(variance);
+
+    // Pearson r vs label-0
+    let pearson = NaN;
+    if (label === 0) {
+      pearson = 1;  // perfect autocorrelation
+    } else if (ref.length > 0) {
+      const cls    = means[label];
+      const minLen = Math.min(cls.length, ref.length);
+      const clsMean = mean;
+      let   num = 0, sA = 0, sB = 0;
+      for (let i = 0; i < minLen; i++) {
+        const da = cls[i] - clsMean;
+        const db = ref[i] - refMean;
+        num += da * db;
+        sA  += da * da;
+        sB  += db * db;
+      }
+      const denom = Math.sqrt(sA * sB);
+      pearson = denom === 0 ? NaN : num / denom;
+    }
+
+    return { label, name, count: c, mean, stdDev, variance, pearson };
+  });
+}
