@@ -39,20 +39,15 @@ Plaintext
 ├── style.css                    # "Deep-Space" theme and responsive layout
 ├── script.js                    # Consolidated Master Logic (Modules 1 & 2)
 └── README.md                    # Project documentation
-⚙️ Installation & Setup
-Clone the Repository:
 
-Bash
-git clone https://github.com/ronzandev/DAALab-AY225-MORANTE.git
-cd fashion-mnist-dashboard
-Prepare the Data:
+## ⚙️ Installation & Data Setup
 
-Create a folder named archive in the root directory.
+Because the Fashion-MNIST dataset exceeds GitHub's file size limits, you must add the data manually:
 
-Place your fashion-mnist_train.csv and fashion-mnist_test.csv files inside the archive folder.
-
-Run a Local Server:
-Due to browser security policies (CORS) and Web Worker requirements, this project must be run through a local server.
+1. **Clone the repo:** `git clone https://github.com/ronzandev/DAALab-AY225-MORANTE.git`
+2. **Download Data:** Get the CSV files from [Kaggle Fashion-MNIST](https://www.kaggle.com/datasets/zalando-research/fashion-mnist).
+3. **Place Files:** Create a folder named `archive` in the root directory and move `fashion-mnist_train.csv` inside.
+4. **Run:** Open `index.html` via a Local Server (e.g., Live Server in VS Code).
 
 VS Code: Use the Live Server extension (Right-click index.html > "Open with Live Server").
 
