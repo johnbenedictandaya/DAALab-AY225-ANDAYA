@@ -669,3 +669,17 @@ function renderInsights() {
   });
   container.appendChild(frag);
 }
+
+/* ════════════════════════════════════════════════════════════════
+   SCROLL SPY
+   ════════════════════════════════════════════════════════════════ */
+(function initScrollSpy() {
+  const ids = ['sec-overview','sec-charts','sec-statistics','sec-dataset','sec-insights'];
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) setActiveNav(e.target.id); }),
+    { threshold: 0.35 }
+  );
+  document.addEventListener('DOMContentLoaded', () => {
+    ids.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
+  });
+})();
